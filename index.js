@@ -6,22 +6,22 @@ const helmet = require('koa-helmet');
 const bodyParser = require('koa-bodyparser');
 const passport = require('koa-passport');
 
-const api = require('./server/routes/api');
+const api = require('./server/routes');
 
-const app = new Koa();
+const index = new Koa();
 const router = new Router();
 
-app.use(cors());
-app.use(helmet());
-app.use(logger());
-app.use(bodyParser());
+index.use(cors());
+index.use(helmet());
+index.use(logger());
+index.use(bodyParser());
 
 require('./server/services/passport');
-app.use(passport.initialize())
-app.use(passport.session())
+index.use(passport.initialize())
+index.use(passport.session())
 
 
-app.use(async (ctx, next) => {
+index.use(async (ctx, next) => {
   try {
     await next();
   } catch (err) {
@@ -32,10 +32,10 @@ app.use(async (ctx, next) => {
 });
 
 
-app.use(api.routes());
+index.use(api.routes());
 
-app.use(router.allowedMethods());
+index.use(router.allowedMethods());
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT);
+index.listen(PORT);

@@ -1,15 +1,23 @@
-const passport = require('passport')
-const TwitterStrategy = require('passport-twitter').Strategy;
+const passport = require('koa-passport')
+const GitHubStrategy = require('passport-github').Strategy
 
-passport.use(new TwitterStrategy({
-        consumerKey: TWITTER_CONSUMER_KEY,
-        consumerSecret: TWITTER_CONSUMER_SECRET,
-        callbackURL: "http://www.example.com/auth/twitter/callback"
+const config = require('../../../config.json.js')
+
+const User = require('../../database/models/User.js')
+
+passport.use(new GitHubStrategy({
+        clientID: config.github.clientId,
+        clientSecret: config.github.clientSecret,
+        callbackURL: 'http://localhost:3000/api/auth/github/callback'
     },
-    function(token, tokenSecret, profile, done) {
-        User.findOrCreate(..., function(err, user) {
-            if (err) { return done(err); }
-            done(null, user);
-        });
+    async (accessToken, refreshToken, profile, cb) => {
+        console.log(profile)
+        const user = await User.query().findOne({githubId: profile.id}).first()
+
+        if (user) {
+            cb(null, user)
+        } else {
+            cb('Error')
+        }
     }
-));
+))
